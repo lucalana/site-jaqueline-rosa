@@ -303,3 +303,13 @@ p{margin:0 0 1.2em}
 @media (max-width:960px){.hero__rail{display:none}.about__media::before{display:none}}
 @media (max-width:560px){.hero__frame{inset:.6rem}.pillars li{padding-top:2.6rem}}
 @media (prefers-reduced-motion:reduce){.hair{transform:none}.btn::after{display:none}}
+
+/* ---- hero desktop: texto à direita, rosto livre ---- */
+@media (min-width:961px){
+  .hero__bg img{object-position:50% 18%}
+  .hero__shade{background:linear-gradient(270deg,rgba(42,24,36,.94) 0%,rgba(58,36,51,.82) 34%,rgba(58,36,51,.25) 62%,rgba(58,36,51,0) 80%),linear-gradient(0deg,rgba(42,24,36,.55),transparent 32%)}
+  .hero__in{display:flex;flex-direction:column;align-items:flex-start;width:34rem;max-width:calc(100% - 2.5rem);margin-left:auto;margin-right:max(3.5rem,calc((100% - 1180px)/2))}
+  .hero h1{font-size:clamp(3rem,5.4vw,5.6rem);max-width:none}
+  .hero__lead{max-width:30rem}
+  .hero__rail{right:auto;left:clamp(1.6rem,3.4vw,3rem)}
+}
