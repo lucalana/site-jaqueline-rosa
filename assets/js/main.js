@@ -51,6 +51,76 @@
   nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
   addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
 
+  // Palavra por palavra: títulos (revelação em máscara) e manifesto (acende ao rolar)
+  const wrapWords = (root, cls, inner) => {
+    let k = 0;
+    const walk = (node) => [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = d.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(t => {
+          if (!t) return;
+          if (/^\s+$/.test(t)) { frag.append(t); return; }
+          const w = d.createElement('span'); w.className = cls;
+          if (inner) { const i = d.createElement('span'); i.textContent = t; w.append(i); } else w.textContent = t;
+          w.style.setProperty('--k', k++); frag.append(w);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1) walk(n);
+    });
+    walk(root);
+  };
+  d.querySelectorAll('[data-words]').forEach(el => {
+    el.setAttribute('aria-label', el.textContent.trim());
+    wrapWords(el, 'w', true);
+    el.querySelectorAll('.w').forEach(w => w.setAttribute('aria-hidden', 'true'));
+  });
+  const scrub = [...d.querySelectorAll('[data-scrub]')];
+  scrub.forEach(el => wrapWords(el, 's', false));
+  const scrubWords = scrub.map(el => [...el.querySelectorAll('.s')]);
+  const runScrub = () => {
+    scrub.forEach((el, i) => {
+      const ws = scrubWords[i];
+      if (reduce) { ws.forEach(w => w.classList.add('on')); return; }
+      const r = el.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (innerHeight * .88 - r.top) / (innerHeight * .45 + r.height * .5)));
+      const n = Math.round(p * ws.length);
+      ws.forEach((w, j) => w.classList.toggle('on', j < n));
+    });
+  };
+  const inview = d.querySelectorAll('[data-words],.reveal-img');
+  if ('IntersectionObserver' in window && !reduce) {
+    // clip-path zera a área visível: para imagens, observa o contêiner pai
+    const io2 = new IntersectionObserver((es) => es.forEach(e => {
+      if (e.isIntersecting) { (e.target._t || e.target).classList.add('in-view'); io2.unobserve(e.target); }
+    }), { threshold: .2 });
+    inview.forEach(el => {
+      if (el.classList.contains('reveal-img')) { el.parentElement._t = el; io2.observe(el.parentElement); }
+      else io2.observe(el);
+    });
+  } else inview.forEach(el => el.classList.add('in-view'));
+  addEventListener('scroll', () => requestAnimationFrame(runScrub), { passive: true });
+  runScrub();
+
+  // Brilho nos cartões (mouse e toque)
+  d.querySelectorAll('.pillars li').forEach(li => {
+    const mv = (e) => { const r = li.getBoundingClientRect(); li.style.setProperty('--mx', (e.clientX - r.left) + 'px'); li.style.setProperty('--my', (e.clientY - r.top) + 'px'); };
+    li.addEventListener('pointermove', mv);
+    li.addEventListener('pointerdown', (e) => { mv(e); li.classList.add('touch'); setTimeout(() => li.classList.remove('touch'), 900); });
+  });
+
+  // Cursor suave, só com mouse
+  if (matchMedia('(hover:hover) and (pointer:fine)').matches && !reduce) {
+    const c = d.createElement('div'); c.className = 'cursor'; c.setAttribute('aria-hidden', 'true'); d.body.append(c);
+    let x = 0, y = 0, cx = 0, cy = 0;
+    addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; c.classList.add('show'); });
+    d.documentElement.addEventListener('pointerleave', () => c.classList.remove('show'));
+    d.querySelectorAll('a,button,.pillars li').forEach(el => {
+      el.addEventListener('pointerenter', () => c.classList.add('big'));
+      el.addEventListener('pointerleave', () => c.classList.remove('big'));
+    });
+    (function loop() { cx += (x - cx) * .18; cy += (y - cy) * .18; c.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)'; requestAnimationFrame(loop); })();
+  }
+
   // Form -> WhatsApp
   const form = d.getElementById('form');
   const note = d.getElementById('form-note');
