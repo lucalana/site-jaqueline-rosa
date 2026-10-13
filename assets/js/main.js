@@ -87,7 +87,7 @@
       ws.forEach((w, j) => w.classList.toggle('on', j < n));
     });
   };
-  const inview = d.querySelectorAll('[data-words],.reveal-img');
+  const inview = d.querySelectorAll('[data-words],.reveal-img,.hair');
   if ('IntersectionObserver' in window && !reduce) {
     // clip-path zera a área visível: para imagens, observa o contêiner pai
     const io2 = new IntersectionObserver((es) => es.forEach(e => {
@@ -107,19 +107,6 @@
     li.addEventListener('pointermove', mv);
     li.addEventListener('pointerdown', (e) => { mv(e); li.classList.add('touch'); setTimeout(() => li.classList.remove('touch'), 900); });
   });
-
-  // Cursor suave, só com mouse
-  if (matchMedia('(hover:hover) and (pointer:fine)').matches && !reduce) {
-    const c = d.createElement('div'); c.className = 'cursor'; c.setAttribute('aria-hidden', 'true'); d.body.append(c);
-    let x = 0, y = 0, cx = 0, cy = 0;
-    addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; c.classList.add('show'); });
-    d.documentElement.addEventListener('pointerleave', () => c.classList.remove('show'));
-    d.querySelectorAll('a,button,.pillars li').forEach(el => {
-      el.addEventListener('pointerenter', () => c.classList.add('big'));
-      el.addEventListener('pointerleave', () => c.classList.remove('big'));
-    });
-    (function loop() { cx += (x - cx) * .18; cy += (y - cy) * .18; c.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)'; requestAnimationFrame(loop); })();
-  }
 
   // Form -> WhatsApp
   const form = d.getElementById('form');
