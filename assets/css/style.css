@@ -313,3 +313,7 @@ p{margin:0 0 1.2em}
   .hero__lead{max-width:30rem}
   .hero__rail{right:auto;left:clamp(1.6rem,3.4vw,3rem)}
 }
+
+/* moldura começa abaixo do menu, sem cruzar a navegação */
+.hero__frame{top:6rem}
+@media (max-width:560px){.hero__frame{top:5rem}}
